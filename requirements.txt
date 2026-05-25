@@ -1,0 +1,48 @@
+# # Core Data
+# pandas==2.2.3
+# numpy>=1.26.4,<2.0.0
+
+# # Machine Learning
+# scikit-learn==1.5.2
+# xgboost==2.1.2
+# optuna==4.0.0
+# joblib==1.4.2
+
+# # Database
+# sqlalchemy>=2.0.36
+# pymysql==1.1.1
+
+# # API
+# fastapi>=0.129.0
+# uvicorn>=0.37.0
+
+# # MLOps
+# mlflow>=2.19.0
+
+# # Environment Variables
+# python-dotenv==0.21.1
+
+
+# Core Data
+pandas
+numpy
+
+# Machine Learning
+scikit-learn
+xgboost
+optuna
+joblib
+
+# Database
+sqlalchemy
+pymysql
+
+# API
+fastapi
+uvicorn
+
+# MLOps
+mlflow
+
+# Environment Variables
+python-dotenv
