@@ -1,98 +1,26 @@
 version: "3.9"
 
-x-airflow-common:
-  &airflow-common
-  build: .
-  image: cifar10-airflow:latest
-  extra_hosts:
-   - "host.docker.internal:host-gateway"
-  env_file:
-    - .env
-  environment:
-    AIRFLOW__CORE__EXECUTOR: CeleryExecutor
-    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow_postgres:5432/airflow
-    AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@airflow_postgres:5432/airflow
-    AIRFLOW__CELERY__BROKER_URL: redis://airflow_redis:6379/0
-    AIRFLOW__CORE__FERNET_KEY: ""
-    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
-    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
-    AIRFLOW__API__AUTH_BACKENDS: airflow.api.auth.backend.basic_auth
-  volumes:
-    - ./dags:/opt/airflow/dags
-    - ./logs:/opt/airflow/logs
-    - ./plugins:/opt/airflow/plugins
-    - ../:/opt/airflow/project
-  user: "${AIRFLOW_UID}:0"
-
 services:
-  airflow_postgres:
-    image: postgres:13
-    container_name: airflow_postgres
-    environment:
-      POSTGRES_USER: airflow
-      POSTGRES_PASSWORD: airflow
-      POSTGRES_DB: airflow
-    volumes:
-      - airflow_postgres_data:/var/lib/postgresql/data
-
-  airflow_redis:
-    image: redis:7
-    container_name: airflow_redis
-
-  # ADD THIS MLFLOW SERVICE
   mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.12.1
+    image: ghcr.io/mlflow/mlflow:v2.16.0
     container_name: mlflow
     ports:
       - "5000:5000"
     volumes:
-      - ./mlruns:/mlflow/mlruns
+      - mlflow_data:/mlflow/mlruns
     command: >
       mlflow server
-      --backend-store-uri sqlite:///mlflow.db
+      --backend-store-uri sqlite:////mlflow/mlruns/mlflow.db
       --default-artifact-root /mlflow/mlruns
       --host 0.0.0.0
       --port 5000
-
-  airflow-init:
-    <<: *airflow-common
-    container_name: airflow_init
-    depends_on:
-      - airflow_postgres
-      - airflow_redis
-      - mlflow
-    command: >
-      bash -c "airflow db migrate &&
-               airflow users create
-               --username admin
-               --password admin
-               --firstname Jeevan
-               --lastname Khatri
-               --role Admin
-               --email admin@example.com"
-
-  airflow-webserver:
-    <<: *airflow-common
-    container_name: airflow_webserver
-    command: webserver
-    ports:
-      - "8080:8080"
-    depends_on:
-      - airflow-init
-
-  airflow-scheduler:
-    <<: *airflow-common
-    container_name: airflow_scheduler
-    command: scheduler
-    depends_on:
-      - airflow-init
-
-  airflow-worker:
-    <<: *airflow-common
-    container_name: airflow_worker
-    command: celery worker
-    depends_on:
-      - airflow-init
+    networks:
+      - astro_network
 
 volumes:
-  airflow_postgres_data:
+  mlflow_data:
+
+networks:
+  astro_network:
+    external: true
+    name: ecommerce-customer-churn--prediction-mlops-pipeline_43bb99_airflow

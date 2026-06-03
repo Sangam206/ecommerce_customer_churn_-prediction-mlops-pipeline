@@ -14,7 +14,7 @@ import numpy as np
 # )
 # db_url="mysql+pymysql://sangam:root@localhost:3306/customer_churn_database"
 engine = create_engine(
-    "mysql+pymysql://sangam:root@host.docker.internal:3306/customer_churn_database"
+    "mysql+pymysql://root:root@host.docker.internal:3306/customer_churn_database"
 )
 
 # engine = create_engine(db_url)

@@ -8,12 +8,13 @@ def load_data():
             'data/raw_data/ecommerce_customer_churn_dataset.csv'
         )
 
-        data.to_sql(
-            'raw_data',
-            engine,
-            if_exists='replace',
-            index=False
-        )
+        with engine.connect() as conn:
+            data.to_sql(
+                'raw_data',
+                conn,
+                if_exists='replace',
+                index=False
+            )
 
         print("data loaded successfully")
 
@@ -21,4 +22,4 @@ def load_data():
         print("Error:", e)
 
 
-# load_data()
+load_data()

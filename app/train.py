@@ -6,8 +6,8 @@ import pandas as pd
 
 
 def hyperparameter_tuning():
-    import optuna
-    from xgboost import XGBClassifier
+    import optuna 
+    from xgboost import XGBClassifier 
 
     x_train=pd.read_csv('after encoding/x_train.csv')
     y_train=pd.read_csv('splitting data/y_train.csv')
@@ -54,62 +54,78 @@ def hyperparameter_tuning():
 
 def model_training():
     from xgboost import XGBClassifier
+    import mlflow
+    import mlflow.xgboost
+    from include.mlflow_utils import setup_mlflow
 
-    x_train=pd.read_csv('after encoding/x_train.csv')
-    y_train=pd.read_csv('splitting data/y_train.csv')
-    best_par=hyperparameter_tuning()
+    x_train = pd.read_csv('after encoding/x_train.csv')
+    y_train = pd.read_csv('splitting data/y_train.csv')
+    best_par = hyperparameter_tuning()
+
+    setup_mlflow("customer_churn_prediction")
 
     try:
-        xgb = XGBClassifier(
-            n_estimators=best_par["n_estimators"],
-            max_depth=best_par["max_depth"],
-            learning_rate=best_par["learning_rate"],
-            subsample=best_par["subsample"],
-            colsample_bytree=best_par["colsample_bytree"],
-            gamma=best_par["gamma"],
-            min_child_weight=best_par["min_child_weight"],
-            reg_alpha=best_par["reg_alpha"],
-            reg_lambda=best_par["reg_lambda"],
-            random_state=42,
-            n_jobs=-1,
-            eval_metric="logloss"
-        )
+        with mlflow.start_run():
+            xgb = XGBClassifier(
+                n_estimators=best_par["n_estimators"],
+                max_depth=best_par["max_depth"],
+                learning_rate=best_par["learning_rate"],
+                subsample=best_par["subsample"],
+                colsample_bytree=best_par["colsample_bytree"],
+                gamma=best_par["gamma"],
+                min_child_weight=best_par["min_child_weight"],
+                reg_alpha=best_par["reg_alpha"],
+                reg_lambda=best_par["reg_lambda"],
+                random_state=42,
+                n_jobs=-1,
+                eval_metric="logloss"
+            )
 
-        xgb.fit(x_train, y_train)
+            xgb.fit(x_train, y_train)
 
-        
-        mk_dir = "train_metrics"
-        os.makedirs(mk_dir, exist_ok=True)
+            # Record training metrics locally
+            mk_dir = "train_metrics"
+            os.makedirs(mk_dir, exist_ok=True)
+            preds = xgb.predict(x_train)
+            report = classification_report(y_train, preds, output_dict=True)
+            report_str = classification_report(y_train, preds)
+            
+            file_path = os.path.join(mk_dir, "train_model_metrics.txt")
+            with open(file_path, "a") as file:
+                file.write(report_str)
+                file.write("\n\n")
 
-        report = classification_report(y_train, xgb.predict(x_train))
+            mlflow.log_params(best_par)
+            mlflow.log_metric("f1_macro", report["macro avg"]["f1-score"])
+            mlflow.log_metric("accuracy", report["accuracy"])
+            mlflow.log_metric("weighted_avg_precision", report["weighted avg"]["precision"])
+            mlflow.log_metric("weighted_avg_recall", report["weighted avg"]["recall"])
+            mlflow.log_metric("weighted_avg_f1", report["weighted avg"]["f1-score"])
 
-        file_path = os.path.join(mk_dir, "train_model_metrics.txt")
+            mlflow.xgboost.log_model(xgb, "model")
 
-        with open(file_path, "a") as file:
-            file.write(report)
-            file.write("\n\n")
-
-        return xgb
+            return xgb
 
     except Exception as e:
         # logger.error(f"training error: {e}")
         raise
+
 # def model_training():
 #     from xgboost import XGBClassifier
-
 #     import mlflow
 #     import mlflow.xgboost
 #     from include.mlflow_utils import setup_mlflow
 
 #     x_train = pd.read_csv('after encoding/x_train.csv')
 #     y_train = pd.read_csv('splitting data/y_train.csv')
-
 #     best_par = hyperparameter_tuning()
 
-#     setup_mlflow("customer_bev_prediction")
+#     setup_mlflow("customer_churn_prediction")
 
 #     try:
 #         with mlflow.start_run():
+#             # Optionally log best hyperparameters separately
+#             mlflow.log_params(best_par)
 
 #             xgb = XGBClassifier(
 #                 n_estimators=best_par["n_estimators"],
@@ -129,13 +145,22 @@ def model_training():
 #             xgb.fit(x_train, y_train)
 
 #             preds = xgb.predict(x_train)
-
 #             report = classification_report(y_train, preds, output_dict=True)
+#             report_str = classification_report(y_train, preds)
 
-#             # 🔥 LOG TO MLFLOW
-#             mlflow.log_params(best_par)
+#             # Save locally
+#             os.makedirs("train_metrics", exist_ok=True)
+#             with open("train_metrics/train_model_metrics.txt", "a") as file:
+#                 file.write(report_str + "\n\n")
+
+#             # Log metrics to MLflow
 #             mlflow.log_metric("f1_macro", report["macro avg"]["f1-score"])
+#             mlflow.log_metric("accuracy", report["accuracy"])
+#             mlflow.log_metric("weighted_avg_precision", report["weighted avg"]["precision"])
+#             mlflow.log_metric("weighted_avg_recall", report["weighted avg"]["recall"])
+#             mlflow.log_metric("weighted_avg_f1", report["weighted avg"]["f1-score"])
 
+#             # Log model to MLflow
 #             mlflow.xgboost.log_model(xgb, "model")
 
 #             return xgb
@@ -159,5 +184,8 @@ def save_model():
         raise
 
 # save_model()
+
+
+
 
 

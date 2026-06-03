@@ -45,4 +45,4 @@ uvicorn
 mlflow
 
 # Environment Variables
-python-dotenv
+python-dotenv

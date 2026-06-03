@@ -8,7 +8,8 @@ def data_cleaning ():
     # data filling
     # handeling outliars
     try:
-        df=pd.read_sql("select * from raw_data ",engine)
+        with engine.connect() as conn:
+            df=pd.read_sql("select * from raw_data ",conn)
 
         df=df.drop_duplicates()
         # logger.debug("duplicates value is removed from dataset")
@@ -38,12 +39,13 @@ def data_cleaning ():
             df[col].fillna(df[col].mode()[0])
         # logger.debug("catogorical columns is filled by mode filling")
         
-        df.to_sql(
-            'clean_data',
-            con=engine,
-            if_exists='replace',
-            index=False
-        )
+        with engine.connect() as conn:
+            df.to_sql(
+                'clean_data',
+                con=conn,
+                if_exists='replace',
+                index=False
+            )
     
     except Exception as e:
         # logger.error("error occured:{e}")

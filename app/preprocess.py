@@ -6,7 +6,8 @@ from sklearn.model_selection import train_test_split
 
 def data_splitting():
 
-    df=pd.read_sql("select * from clean_data",engine)
+    with engine.connect() as conn:
+        df=pd.read_sql("select * from clean_data",conn)
 
     
     # logger.debug("data splitting start")
