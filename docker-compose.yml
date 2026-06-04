@@ -2,16 +2,19 @@ version: "3.9"
 
 services:
   mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.16.0
+    image: ghcr.io/mlflow/mlflow:v3.12.0
     container_name: mlflow
     ports:
       - "5000:5000"
     volumes:
       - mlflow_data:/mlflow/mlruns
+    environment:
+      - GUNICORN_CMD_ARGS=--forwarded-allow-ips=*
     command: >
       mlflow server
       --backend-store-uri sqlite:////mlflow/mlruns/mlflow.db
-      --default-artifact-root /mlflow/mlruns
+      --artifacts-destination /mlflow/mlruns
+      --serve-artifacts
       --host 0.0.0.0
       --port 5000
     networks:

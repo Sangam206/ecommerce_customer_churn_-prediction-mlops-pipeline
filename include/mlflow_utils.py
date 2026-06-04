@@ -1,12 +1,49 @@
 import os
 import mlflow
 
-os.environ["GIT_PYTHON_REFRESH"] = "quiet"
 
 def setup_mlflow(experiment_name="customer_churn_prediction"):
-    tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "http://mlflow:5000")
+    # Use IP directly — bypasses DNS rebinding protection
+    tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "http://172.18.0.3:5000")
+
+    print("=" * 60)
+    print("NEW MLFLOW CONFIG LOADED")
+    print(f"Tracking URI: {tracking_uri}")
+    print(f"Experiment Name: {experiment_name}")
+    print("=" * 60)
+
     mlflow.set_tracking_uri(tracking_uri)
-    if mlflow.get_experiment_by_name(experiment_name) is None:
-        mlflow.create_experiment(experiment_name)
     mlflow.set_experiment(experiment_name)
-    print(f"MLflow connected → {tracking_uri} | Experiment: {experiment_name}")
+
+
+
+
+
+# def log_model(model, params=None, metrics=None, model_name="model"):
+#     with mlflow.start_run():
+
+#         if params:
+#             mlflow.log_params(params)
+
+#         if metrics:
+#             mlflow.log_metrics(metrics)
+
+#         try:
+#             import xgboost
+#             if isinstance(model, xgboost.XGBModel):
+#                 mlflow.xgboost.log_model(
+#                     model,
+#                     name=model_name        # ✅ MLflow v3 API
+#                 )
+#             else:
+#                 mlflow.sklearn.log_model(
+#                     model,
+#                     name=model_name
+#                 )
+#         except ImportError:
+#             mlflow.sklearn.log_model(model, name=model_name)
+
+#         run_id = mlflow.active_run().info.run_id
+#         print(f"Model '{model_name}' logged successfully.")
+#         print(f"Run ID: {run_id}")
+#         return run_id
