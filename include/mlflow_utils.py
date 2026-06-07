@@ -3,8 +3,7 @@ import mlflow
 
 
 def setup_mlflow(experiment_name="customer_churn_prediction"):
-    # Use IP directly — bypasses DNS rebinding protection
-    tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "http://172.18.0.3:5000")
+    tracking_uri = os.getenv("MLFLOW_TRACKING_URI", "http://mlflow:5000")
 
     print("=" * 60)
     print("NEW MLFLOW CONFIG LOADED")
@@ -14,8 +13,6 @@ def setup_mlflow(experiment_name="customer_churn_prediction"):
 
     mlflow.set_tracking_uri(tracking_uri)
     mlflow.set_experiment(experiment_name)
-
-
 
 
 

@@ -3,30 +3,25 @@ import numpy as np
 from database.db import engine
 import os
 from sklearn.model_selection import train_test_split
-from database.redis_client import save_df_to_redis,load_df_from_redis
+from database.redis_client import load_df_from_redis
 
 
 
 def data_splitting():
+    df = load_df_from_redis("clean_data")
 
-    with engine.connect() as conn:
-        # df=pd.read_sql("select * from clean_data",conn)
-        df = load_df_from_redis("clean_data")
+    if df is None:
+        raise ValueError("Failed to load 'clean_data' from Redis — connection refused or key does not exist.")
 
-    
-    # logger.debug("data splitting start")
-    mk_dir='splitting data'
-    os.makedirs(mk_dir,exist_ok=True)
-    x=df.drop(columns='Churned')
-    y=df['Churned']
-    x_train,x_test,y_train,y_test=train_test_split(x,y,test_size=0.3,random_state=42)
-    x_train.to_csv(os.path.join(mk_dir,"x_train.csv"),index=False)
-    y_train.to_csv(os.path.join(mk_dir,"y_train.csv"),index=False)
-    x_test.to_csv(os.path.join(mk_dir,"x_test.csv"),index=False)
-    y_test.to_csv(os.path.join(mk_dir,"y_test.csv"),index=False)
-    # logger.debug("data splitting done")
-    # return x_train,x_test,y_train,y_test 
-# data_splitting()
+    mk_dir = 'splitting data'
+    os.makedirs(mk_dir, exist_ok=True)
+    x = df.drop(columns='Churned')
+    y = df['Churned']
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=42)
+    x_train.to_csv(os.path.join(mk_dir, "x_train.csv"), index=False)
+    y_train.to_csv(os.path.join(mk_dir, "y_train.csv"), index=False)
+    x_test.to_csv(os.path.join(mk_dir, "x_test.csv"), index=False)
+    y_test.to_csv(os.path.join(mk_dir, "y_test.csv"), index=False)
 
 def preprocess_data():
     from sklearn.preprocessing import StandardScaler, OneHotEncoder

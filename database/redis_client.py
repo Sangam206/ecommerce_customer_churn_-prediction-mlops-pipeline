@@ -1,10 +1,9 @@
 import redis
 import pandas as pd
-import json
 import os
 
 
-REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+REDIS_HOST = os.getenv("REDIS_HOST", "redis_cache")  # fixed default
 REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
 REDIS_TTL = 60 * 60 * 24  # 24 hours
 
@@ -17,7 +16,6 @@ def get_redis_client():
         decode_responses=True
     )
 
-import pandas as pd
 
 def save_df_to_redis(key: str, df: pd.DataFrame):
     """Save a DataFrame to Redis."""

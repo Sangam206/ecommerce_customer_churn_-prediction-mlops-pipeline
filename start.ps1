@@ -1,5 +1,5 @@
 # Start Astro
-astro dev start
+astro dev restart
 
 # Start MLflow
 docker compose -f docker-compose.yml up -d
