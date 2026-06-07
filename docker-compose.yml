@@ -20,8 +20,20 @@ services:
     networks:
       - astro_network
 
+  redis:
+    image: redis:7
+    container_name: redis_cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - astro_network
+
 volumes:
   mlflow_data:
+  redis_data:
 
 networks:
   astro_network:

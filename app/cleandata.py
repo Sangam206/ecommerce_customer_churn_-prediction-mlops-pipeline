@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np 
 from database.db import engine
+from database.redis_client import save_df_to_redis
 
   
 def data_cleaning ():
@@ -46,6 +47,8 @@ def data_cleaning ():
                 if_exists='replace',
                 index=False
             )
+        save_df_to_redis("clean_data", df)
+        print(" Clean data saved to Redis")
     
     except Exception as e:
         # logger.error("error occured:{e}")

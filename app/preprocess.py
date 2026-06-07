@@ -3,11 +3,15 @@ import numpy as np
 from database.db import engine
 import os
 from sklearn.model_selection import train_test_split
+from database.redis_client import save_df_to_redis,load_df_from_redis
+
+
 
 def data_splitting():
 
     with engine.connect() as conn:
-        df=pd.read_sql("select * from clean_data",conn)
+        # df=pd.read_sql("select * from clean_data",conn)
+        df = load_df_from_redis("clean_data")
 
     
     # logger.debug("data splitting start")
