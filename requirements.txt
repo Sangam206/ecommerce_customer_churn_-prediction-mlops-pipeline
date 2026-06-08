@@ -17,3 +17,4 @@ evidently
 
 # http://127.0.0.1:8000/docs
 # http://localhost:8501
+astro-run-dag # This package is needed for the astro run command. It will be removed before a deploy
