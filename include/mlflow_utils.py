@@ -15,7 +15,6 @@ def setup_mlflow(experiment_name="customer_churn_prediction"):
     mlflow.set_experiment(experiment_name)
 
 
-
 # def log_model(model, params=None, metrics=None, model_name="model"):
 #     with mlflow.start_run():
 

@@ -1,8 +1,53 @@
+# version: "3.9"
+
+# services:
+#   mlflow:
+#     image: ghcr.io/mlflow/mlflow:v3.1.0
+#     container_name: mlflow
+#     ports:
+#       - "5000:5000"
+#     volumes:
+#       - mlflow_data:/mlflow/mlruns
+#     environment:
+#       - GUNICORN_CMD_ARGS=--forwarded-allow-ips=*
+#     command: mlflow server --backend-store-uri sqlite:////mlflow/mlruns/mlflow.db --artifacts-destination /mlflow/mlruns --serve-artifacts --host 0.0.0.0 --port 5000
+#     networks:
+#       - astro_network
+#     healthcheck:
+#       test: ["CMD-SHELL", "curl -f http://localhost:5000 || exit 1"]
+#       interval: 5s
+#       timeout: 3s
+#       retries: 5
+
+#   redis:
+#     image: redis:7
+#     container_name: redis_cache
+#     ports:
+#       - "6379:6379"
+#     volumes:
+#       - redis_data:/data
+#     command: redis-server --appendonly yes
+#     networks:
+#       - astro_network
+#     healthcheck:
+#       test: ["CMD", "redis-cli", "ping"]
+#       interval: 5s
+#       timeout: 3s
+#       retries: 5
+
+# volumes:
+#   mlflow_data:
+#   redis_data:
+
+# networks:
+#   astro_network:
+#     external: true
+#     name: ecommerce-customer-churn--prediction-mlops-pipeline_43bb99_airflow
 version: "3.9"
 
 services:
   mlflow:
-    image: ghcr.io/mlflow/mlflow:v3.12.0
+    image: ghcr.io/mlflow/mlflow:v3.1.0
     container_name: mlflow
     ports:
       - "5000:5000"
@@ -10,15 +55,15 @@ services:
       - mlflow_data:/mlflow/mlruns
     environment:
       - GUNICORN_CMD_ARGS=--forwarded-allow-ips=*
-    command: >
-      mlflow server
-      --backend-store-uri sqlite:////mlflow/mlruns/mlflow.db
-      --artifacts-destination /mlflow/mlruns
-      --serve-artifacts
-      --host 0.0.0.0
-      --port 5000
+    command: mlflow server --backend-store-uri sqlite:////mlflow/mlruns/mlflow.db --artifacts-destination /mlflow/mlruns --serve-artifacts --host 0.0.0.0 --port 5000
+    restart: always
     networks:
       - astro_network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5000 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   redis:
     image: redis:7
@@ -28,6 +73,7 @@ services:
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
+    restart: always
     networks:
       - astro_network
     healthcheck:
@@ -36,9 +82,77 @@ services:
       timeout: 3s
       retries: 5
 
+  # fastapi:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.api
+  #   image: churn-fastapi:latest
+  #   container_name: fastapi
+  #   ports:
+  #     - "8000:8000"
+  #   volumes:
+  #     - ./models:/app/models
+  #   restart: always
+  #   networks:
+  #     - astro_network
+
+  fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    image: churn-fastapi:latest
+    container_name: fastapi
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/app/models
+      - ./monitoring_reports:/app/monitoring_reports
+    restart: always
+    networks:
+      - astro_network
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    image: churn-streamlit:latest
+    container_name: streamlit
+    ports:
+      - "8501:8501"
+    depends_on:
+      - fastapi
+    restart: always
+    networks:
+      - astro_network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    restart: always
+    networks:
+      - astro_network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    restart: always
+    networks:
+      - astro_network
+
 volumes:
   mlflow_data:
   redis_data:
+  grafana_data:
 
 networks:
   astro_network:

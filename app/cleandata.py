@@ -2,11 +2,13 @@ import pandas as pd
 import numpy as np 
 from database.db import engine
 from database.redis_client import save_df_to_redis
-
+from include.logging import logger
 
 def data_cleaning():
+    logger.debug("cleaning started")
     with engine.connect() as conn:
         df = pd.read_sql("select * from raw_data", conn)
+        df = load_df_from_redis("clean_data")
 
     # remove duplicates
     df = df.drop_duplicates()
@@ -33,4 +35,7 @@ def data_cleaning():
 
     # save to Redis
     save_df_to_redis("clean_data", df)
-    print("Clean data saved to Redis successfully")
+    logger.debug("Clean data saved to Redis successfully")
+
+
+    
