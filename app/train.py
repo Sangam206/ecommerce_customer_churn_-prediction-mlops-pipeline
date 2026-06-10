@@ -143,14 +143,14 @@ def model_training():
 
 def save_model():
     print("Saving models...")
-    model = model_training()
+    xgb, rf = model_training()  
 
     os.makedirs("models", exist_ok=True)
 
     with open("models/model.pkl", "wb") as f:
-        pickle.dump(model, f)
+        pickle.dump(xgb, f)  
 
     with open("models/rf_model.pkl", "wb") as f:
-        pickle.dump(model, f)
+        pickle.dump(rf, f)   
 
     print("Done")
