@@ -3,6 +3,7 @@ import pickle
 import pandas as pd
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import classification_report
+from database.redis_client import load_encoded_data_from_redis
 
 
 def compute_scale_pos_weight(y):
@@ -16,8 +17,11 @@ def hyperparameter_tuning():
     import optuna
     from xgboost import XGBClassifier
 
-    x_train = pd.read_csv('after encoding/x_train.csv')
-    y_train = pd.read_csv('splitting data/y_train.csv').values.ravel()
+    # x_train = pd.read_csv('after encoding/x_train.csv')
+    # y_train = pd.read_csv('splitting data/y_train.csv').values.ravel()
+    x_train, _, y_train, _ = load_encoded_data_from_redis("processed_data")
+    y_train = y_train.values.ravel()
+
 
     scale_pos_weight = compute_scale_pos_weight(y_train)
 
@@ -62,8 +66,10 @@ def model_training():
     import numpy as np
     from include.mlflow_utils import setup_mlflow
 
-    x_train = pd.read_csv('after encoding/x_train.csv')
-    y_train = pd.read_csv('splitting data/y_train.csv').values.ravel()
+    # x_train = pd.read_csv('after encoding/x_train.csv')
+    # y_train = pd.read_csv('splitting data/y_train.csv').values.ravel()
+    x_train, _, y_train, _ = load_encoded_data_from_redis("processed_data")
+    y_train = y_train.values.ravel()
     best_par = hyperparameter_tuning()
 
     # Random Forest class weights
@@ -136,10 +142,15 @@ def model_training():
 
 
 def save_model():
+    print("Saving models...")
     model = model_training()
+
     os.makedirs("models", exist_ok=True)
+
     with open("models/model.pkl", "wb") as f:
         pickle.dump(model, f)
 
-    with open("models/rf_model.pkl","wb") as f:
-        pickle.dump(model,f)
+    with open("models/rf_model.pkl", "wb") as f:
+        pickle.dump(model, f)
+
+    print("Done")

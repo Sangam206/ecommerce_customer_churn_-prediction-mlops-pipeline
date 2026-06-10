@@ -11,9 +11,14 @@ uvicorn
 mlflow==3.12.0
 python-dotenv
 evidently==0.4.33
-
+streamlit==1.51.0
 
 # uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 for running fastapi 
 
 # http://127.0.0.1:8000/docs
 # http://localhost:8501
+
+# AIRFLOW_UID=50000
+# REDIS_HOST=redis_cache
+# REDIS_PORT=6379
+# MLFLOW_TRACKING_URI=http://mlflow:5000

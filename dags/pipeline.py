@@ -3,13 +3,8 @@ from airflow.providers.standard.operators.python import PythonOperator
 from datetime import datetime
 import requests
 
-from database.load_data import load_data
-from app.cleandata import data_cleaning
-from app.preprocess import data_splitting, preprocess_data
-from app.train import hyperparameter_tuning, model_training, save_model
-from app.monitor import monitor_model
-from app.register import register_best_model
 
+# ── Wrapper functions — imports happen INSIDE task, not at DAG load time ──
 
 def reload_fastapi_model():
     try:
@@ -19,41 +14,76 @@ def reload_fastapi_model():
         print(f"Reload failed: {e}")
 
 
+def run_load_data():
+    from database.load_data import load_data
+    load_data()
+
+
+def run_data_cleaning():
+    from app.cleandata import data_cleaning
+    data_cleaning()
+
+
+def run_data_splitting():
+    from app.preprocess import data_splitting
+    data_splitting()
+
+
+def run_preprocess_data():
+    from app.preprocess import preprocess_data
+    preprocess_data()
+
+
+def run_save_model():
+    from app.train import save_model
+    save_model()
+
+
+def run_register_best_model():
+    from app.register import register_best_model
+    register_best_model()
+
+
+# ── DAG Definition ────────────────────────────────────────────────────────
+
 with DAG(
     dag_id="ml_pipeline",
     start_date=datetime(2026, 1, 1),
-    schedule="@daily",
-    catchup=False
+    schedule="@weekly",  # retrain every week automatically
+    catchup=False,
+    default_args={
+        "retries": 1,
+    }
 ) as dag:
 
     upload_task = PythonOperator(
         task_id="upload_csv",
-        python_callable=load_data
+        python_callable=run_load_data
     )
 
     clean_task = PythonOperator(
         task_id="clean_data",
-        python_callable=data_cleaning
+        python_callable=run_data_cleaning
     )
 
     split_task = PythonOperator(
         task_id="splitting_data",
-        python_callable=data_splitting
+        python_callable=run_data_splitting
     )
 
     preprocess_task = PythonOperator(
         task_id="preprocess_data",
-        python_callable=preprocess_data
+        python_callable=run_preprocess_data
     )
 
     train_task = PythonOperator(
         task_id="train_model",
-        python_callable=save_model
+        python_callable=run_save_model
     )
 
     register_task = PythonOperator(
         task_id="register_model",
-        python_callable=register_best_model
+        python_callable=run_register_best_model
     )
 
     reload_task = PythonOperator(
@@ -61,9 +91,4 @@ with DAG(
         python_callable=reload_fastapi_model
     )
 
-    monitor_task = PythonOperator(
-        task_id="monitor_model",
-        python_callable=monitor_model
-    )
-
-    upload_task >> clean_task >> split_task >> preprocess_task >> train_task >> register_task >> reload_task >> monitor_task
+    upload_task >> clean_task >> split_task >> preprocess_task >> train_task >> register_task >> reload_task
