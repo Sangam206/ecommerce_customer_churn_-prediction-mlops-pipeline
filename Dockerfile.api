@@ -1,6 +1,30 @@
+# FROM python:3.10-slim
+# WORKDIR /app
+# COPY app/ ./app/
+# COPY models/ ./models/
+# RUN pip install fastapi uvicorn pandas scikit-learn xgboost joblib prometheus-client evidently
+# CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
 FROM python:3.10-slim
+
 WORKDIR /app
+
 COPY app/ ./app/
-COPY models/ ./models/
-RUN pip install fastapi uvicorn pandas scikit-learn xgboost joblib prometheus-client evidently
+
+RUN pip install --no-cache-dir \
+    fastapi \
+    uvicorn \
+    pandas \
+    scikit-learn \
+    xgboost \
+    joblib \
+    prometheus-client \
+    evidently \
+    mlflow==2.* \
+    boto3
+
+ENV MLFLOW_TRACKING_URI=http://mlflow:5000
+ENV MLFLOW_MODEL_NAME=churn_model
+ENV MLFLOW_MODEL_ALIAS=champion
+
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

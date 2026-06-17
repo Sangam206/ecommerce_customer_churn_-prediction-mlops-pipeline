@@ -1,0 +1,39 @@
+2026-06-15 17:38:57,978 - log - DEBUG - star_schema start 
+2026-06-15 17:39:25,285 - log - DEBUG - star_schema start 
+2026-06-15 17:40:41,451 - log - DEBUG - star_schema start 
+2026-06-15 17:40:47,333 - log - DEBUG - star_schema start 
+2026-06-15 17:42:09,776 - log - DEBUG - star_schema start 
+2026-06-15 17:42:09,924 - log - DEBUG - Star Schema Created Successfully
+2026-06-15 17:42:09,924 - log - DEBUG - data inserted to dim_customer
+2026-06-15 17:42:11,510 - log - DEBUG - dim_customer loaded
+2026-06-16 09:34:47,876 - log - DEBUG - star_schema start 
+2026-06-16 09:34:50,643 - log - DEBUG - Star Schema Created Successfully
+2026-06-16 09:34:50,643 - log - DEBUG - data inserted to dim_customer
+2026-06-16 09:34:52,812 - log - DEBUG - dim_customer loaded
+2026-06-16 10:03:25,526 - log - DEBUG - star_schema start 
+2026-06-16 10:04:21,784 - log - DEBUG - star_schema start 
+2026-06-16 10:04:27,539 - log - DEBUG - star_schema start 
+2026-06-16 10:05:41,335 - log - DEBUG - star_schema start 
+2026-06-16 10:15:39,941 - log - DEBUG - star_schema start 
+2026-06-16 10:25:03,615 - log - DEBUG - star_schema start 
+2026-06-16 10:25:14,002 - log - DEBUG - star_schema start 
+2026-06-16 10:25:20,185 - log - DEBUG - star_schema start 
+2026-06-16 10:37:22,937 - log - DEBUG - star_schema start 
+2026-06-16 10:38:13,735 - log - DEBUG - star_schema start 
+2026-06-16 10:45:28,099 - log - DEBUG - star_schema start 
+2026-06-16 10:45:29,793 - log - DEBUG - Star Schema Created Successfully
+2026-06-16 10:45:29,793 - log - DEBUG - data inserted to dim_customer
+2026-06-16 10:45:33,301 - log - DEBUG - dim_customer loaded
+2026-06-16 11:29:11,433 - log - DEBUG - star_schema start 
+2026-06-16 11:29:15,738 - log - DEBUG - Star Schema Created Successfully
+2026-06-16 11:29:15,739 - log - DEBUG - data inserted to dim_customer
+2026-06-16 11:29:18,138 - log - DEBUG - dim_customer loaded
+2026-06-16 13:43:53,936 - log - DEBUG - star_schema start
+2026-06-16 13:50:50,345 - log - DEBUG - star_schema start 
+2026-06-16 13:50:55,078 - log - DEBUG - star_schema start
+2026-06-16 13:51:09,812 - log - DEBUG - star_schema start 
+2026-06-16 13:51:52,265 - log - DEBUG - star_schema start 
+2026-06-16 14:00:06,167 - log - DEBUG - star_schema start 
+2026-06-16 15:11:32,481 - log - DEBUG - star_schema start 
+2026-06-16 15:14:24,683 - log - DEBUG - star_schema start 
+2026-06-16 15:17:53,197 - log - DEBUG - star_schema start 

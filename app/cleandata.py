@@ -9,7 +9,8 @@ def data_cleaning():
     logger.debug("cleaning started")
     with engine.connect() as conn:
         df = pd.read_sql("select * from raw_data", conn)
-        # df = load_df_from_redis("clean_data")
+        l
+        df = load_df_from_redis("clean_data")
 
     # remove duplicates
     df = df.drop_duplicates()

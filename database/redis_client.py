@@ -4,9 +4,20 @@ import redis
 import pandas as pd
 import os
 
-REDIS_HOST = os.getenv("REDIS_HOST", "redis_cache")
-REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+# For Astro/Airflow containers talking to Redis running outside Astro
+REDIS_HOST = os.getenv("REDIS_HOST", "host.docker.internal")
+REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
 REDIS_TTL = 60 * 60 * 24  # 24 hours
+
+
+def get_redis_client():
+    return redis.Redis(
+        host=REDIS_HOST,
+        port=REDIS_PORT,
+        db=0,
+        decode_responses=True,
+        socket_connect_timeout=5,
+    )
 
 
 def get_redis_client():

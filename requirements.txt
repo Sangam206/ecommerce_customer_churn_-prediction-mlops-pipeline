@@ -22,3 +22,5 @@ streamlit==1.51.0
 # REDIS_HOST=redis_cache
 # REDIS_PORT=6379
 # MLFLOW_TRACKING_URI=http://mlflow:5000
+
+# docker exec -it mariadb mariadb -u sangam -proot customer_churn_database

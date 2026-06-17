@@ -42,7 +42,7 @@
 # networks:
 #   astro_network:
 #     external: true
-#     name: ecommerce-customer-churn--prediction-mlops-pipeline_43bb99_airflow
+#     name: ecommerce-customer-churn--prediction-mlops-pipeline_4b98a0_airflow
 version: "3.9"
 
 services:
@@ -136,25 +136,35 @@ services:
     networks:
       - astro_network
 
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
+
+  mariadb:
+    image: mariadb:11.4.10
+    container_name: mariadb
     ports:
-      - "3000:3000"
+      - "3306:3306"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: customer_churn_database
+      MYSQL_USER: sangam
+      MYSQL_PASSWORD: root
     volumes:
-      - grafana_data:/var/lib/grafana
+      - mysql_data:/var/lib/mysql
     restart: always
     networks:
       - astro_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 
 volumes:
   mlflow_data:
   redis_data:
-  grafana_data:
+  mysql_data:
 
 networks:
   astro_network:
     external: true
-    name: ecommerce-customer-churn--prediction-mlops-pipeline_43bb99_airflow
+    name: ecommerce-customer-churn--prediction-mlops-pipeline_4b98a0_airflow

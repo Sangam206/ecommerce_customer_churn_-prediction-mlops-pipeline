@@ -2,13 +2,17 @@ from sqlalchemy import create_engine, text
 import pandas as pd
 from datetime import date
 from include.logging import logger
+from pathlib import Path   # ✅ ADDED ONLY THIS
+
 # Database Connection
 engine = create_engine(
-    "mysql+pymysql://root:root@host.docker.internal:3306/customer_star_schema"
+    # "mysql+pymysql://sangam:root@host.docker.internal:3306/customer_star_schema"
+    "mysql+pymysql://sangam:root@127.0.0.1:3306/customer_churn_database"
 )
 
-# Load CSV
-df = pd.read_csv(r"data\raw_data\ecommerce_customer_churn_dataset.csv")
+# ✅ FIXED PATH ISSUE (ONLY CHANGE)
+BASE_DIR = Path(__file__).resolve().parent.parent
+df = pd.read_csv(BASE_DIR / "data" / "raw_data" / "ecommerce_customer_churn_dataset.csv")
 
 
 def create_star_schema():
@@ -16,10 +20,8 @@ def create_star_schema():
     
     with engine.begin() as conn:
 
-        # Disable foreign key checks
         conn.execute(text("SET FOREIGN_KEY_CHECKS = 0"))
 
-        # Drop tables in correct order
         conn.execute(text("DROP TABLE IF EXISTS fact_churn"))
         conn.execute(text("DROP TABLE IF EXISTS dim_financial"))
         conn.execute(text("DROP TABLE IF EXISTS dim_purchase"))
@@ -28,10 +30,8 @@ def create_star_schema():
         conn.execute(text("DROP TABLE IF EXISTS dim_date"))
         conn.execute(text("DROP TABLE IF EXISTS dim_customer"))
 
-        # Enable foreign key checks
         conn.execute(text("SET FOREIGN_KEY_CHECKS = 1"))
 
-        # ---------------- DIM CUSTOMER ----------------
         conn.execute(text("""
         CREATE TABLE dim_customer (
             customer_key INT AUTO_INCREMENT PRIMARY KEY,
@@ -44,7 +44,6 @@ def create_star_schema():
         )
         """))
 
-        # ---------------- DIM DATE ----------------
         conn.execute(text("""
         CREATE TABLE dim_date (
             date_key INT AUTO_INCREMENT PRIMARY KEY,
@@ -56,7 +55,6 @@ def create_star_schema():
         )
         """))
 
-        # ---------------- DIM MODEL ----------------
         conn.execute(text("""
         CREATE TABLE dim_model (
             model_key INT AUTO_INCREMENT PRIMARY KEY,
@@ -66,7 +64,6 @@ def create_star_schema():
         )
         """))
 
-        # ---------------- DIM ENGAGEMENT ----------------
         conn.execute(text("""
         CREATE TABLE dim_engagement (
             engagement_key INT AUTO_INCREMENT PRIMARY KEY,
@@ -80,7 +77,6 @@ def create_star_schema():
         )
         """))
 
-        # ---------------- DIM PURCHASE ----------------
         conn.execute(text("""
         CREATE TABLE dim_purchase (
             purchase_key INT AUTO_INCREMENT PRIMARY KEY,
@@ -95,7 +91,6 @@ def create_star_schema():
         )
         """))
 
-        # ---------------- DIM FINANCIAL ----------------
         conn.execute(text("""
         CREATE TABLE dim_financial (
             financial_key INT AUTO_INCREMENT PRIMARY KEY,
@@ -105,7 +100,6 @@ def create_star_schema():
         )
         """))
 
-        # ---------------- FACT CHURN (lean) ----------------
         conn.execute(text("""
         CREATE TABLE fact_churn (
             fact_key INT AUTO_INCREMENT PRIMARY KEY,
@@ -153,7 +147,6 @@ def insert_dim_customer(df):
 
 
 def insert_dim_date():
-
     today = date.today()
 
     date_df = pd.DataFrame([{
@@ -175,7 +168,6 @@ def insert_dim_date():
 
 
 def insert_dim_model():
-
     model_df = pd.DataFrame([{
         "run_id": "run_001",
         "model_version": "v1",
@@ -193,7 +185,6 @@ def insert_dim_model():
 
 
 def insert_dim_engagement(df):
-
     engagement_df = df[[
         "Login_Frequency", "Session_Duration_Avg", "Pages_Per_Session",
         "Mobile_App_Usage", "Social_Media_Engagement_Score",
@@ -217,7 +208,6 @@ def insert_dim_engagement(df):
 
 
 def insert_dim_purchase(df):
-
     purchase_df = df[[
         "Total_Purchases", "Average_Order_Value", "Days_Since_Last_Purchase",
         "Discount_Usage_Rate", "Returns_Rate", "Cart_Abandonment_Rate",
@@ -241,7 +231,6 @@ def insert_dim_purchase(df):
 
 
 def insert_dim_financial(df):
-
     financial_df = df[[
         "Lifetime_Value", "Credit_Balance", "Customer_Service_Calls"
     ]].copy()
@@ -261,12 +250,10 @@ def insert_dim_financial(df):
 
 
 def insert_fact_churn(df):
-
-    # Fetch all dimension keys in order
-    customer_keys   = pd.read_sql("SELECT customer_key   FROM dim_customer   ORDER BY customer_key",   engine)
+    customer_keys   = pd.read_sql("SELECT customer_key   FROM dim_customer   ORDER BY customer_key", engine)
     engagement_keys = pd.read_sql("SELECT engagement_key FROM dim_engagement ORDER BY engagement_key", engine)
-    purchase_keys   = pd.read_sql("SELECT purchase_key   FROM dim_purchase   ORDER BY purchase_key",   engine)
-    financial_keys  = pd.read_sql("SELECT financial_key  FROM dim_financial  ORDER BY financial_key",  engine)
+    purchase_keys   = pd.read_sql("SELECT purchase_key   FROM dim_purchase   ORDER BY purchase_key", engine)
+    financial_keys  = pd.read_sql("SELECT financial_key  FROM dim_financial  ORDER BY financial_key", engine)
 
     fact_df = pd.DataFrame({
         "customer_key":   customer_keys["customer_key"],
@@ -289,7 +276,6 @@ def insert_fact_churn(df):
 
 
 def main():
-
     create_star_schema()
 
     insert_dim_customer(df)
@@ -298,11 +284,10 @@ def main():
     insert_dim_engagement(df)
     insert_dim_purchase(df)
     insert_dim_financial(df)
-
     insert_fact_churn(df)
 
     print("ETL COMPLETED SUCCESSFULLY")
 
 
 if __name__ == "__main__":
-    main()
+    main()  

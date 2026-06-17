@@ -53,6 +53,7 @@ def hyperparameter_tuning():
     # Attach scale_pos_weight so it carries into training
     best_params = study.best_params
     best_params["scale_pos_weight"] = scale_pos_weight
+    print("Best Hyperparameters:", best_params )
     return best_params
 
 
@@ -68,7 +69,7 @@ def model_training():
 
     # x_train = pd.read_csv('after encoding/x_train.csv')
     # y_train = pd.read_csv('splitting data/y_train.csv').values.ravel()
-    x_train, _, y_train, _ = load_encoded_data_from_redis("processed_data")
+    x_train, x_test, y_train, y_test = load_encoded_data_from_redis("processed_data")
     y_train = y_train.values.ravel()
     best_par = hyperparameter_tuning()
 
@@ -94,9 +95,9 @@ def model_training():
         )
         xgb.fit(x_train, y_train)
 
-        preds = xgb.predict(x_train)
-        report = classification_report(y_train, preds, output_dict=True)
-        report_str = classification_report(y_train, preds)
+        preds = xgb.predict(x_test)
+        report = classification_report(y_test, preds, output_dict=True)
+        report_str = classification_report(y_test, preds)
 
         os.makedirs("train_metrics", exist_ok=True)
         with open("train_metrics/train_model_metrics.txt", "a") as f:
@@ -121,9 +122,9 @@ def model_training():
         )
         rf.fit(x_train, y_train)
 
-        rf_preds = rf.predict(x_train)
-        rf_report = classification_report(y_train, rf_preds, output_dict=True)
-        rf_report_str = classification_report(y_train, rf_preds)
+        rf_preds = rf.predict(x_test)
+        rf_report = classification_report(y_test, rf_preds, output_dict=True)
+        rf_report_str = classification_report(y_test, rf_preds)
 
         with open("train_metrics/train_model_metrics.txt", "a") as f:
             f.write("Random Forest Results\n")
